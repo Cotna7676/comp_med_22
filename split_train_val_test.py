@@ -1,4 +1,4 @@
-# split data into train, val, test
+# split labels.csv into train_labels.csv, val_labels.csv, test_labels.csv
 
 import pandas as pd
 import numpy as np
