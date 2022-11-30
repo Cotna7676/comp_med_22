@@ -147,7 +147,7 @@ def run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloa
 
     save_loss_acc(model_name, num_epochs, train_loss, train_acc, val_loss, val_acc)
 
-    best_model = model.load_state_dict(best_model_wts)
+    # best_model = model.load_state_dict(best_model_wts)
     phase = 'test'
     running_loss = 0
     running_corrects = 0
