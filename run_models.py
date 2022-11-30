@@ -151,10 +151,14 @@ def run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloa
     phase = 'test'
     running_loss = 0
     running_corrects = 0
+    f_score_corrects = 0
+
+    num_batches = 0
     # Iterate over data.
     for inputs, labels in dataloaders[phase]:
         inputs = inputs.to(device)
         labels = labels.to(device)
+        num_batches += 1
 
         # forward
         # track history if only in train
@@ -167,8 +171,14 @@ def run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloa
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
 
+        f1 = F1Score(num_classes = 7)
+        f_score_corrects += f1(preds, labels.data)
+
     test_loss = running_loss / dataset_sizes[phase]
-    test_acc = running_corrects.double() / dataset_sizes[phase]
+    # test_acc = running_corrects.double() / dataset_sizes[phase]
+
+    # f score
+    test_acc = f_score_corrects.double() / num_batches
 
     print(test_loss, test_acc)
     save_test_loss_acc(model_name, test_loss, test_acc)
@@ -237,7 +247,7 @@ def AlexNet(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
 
-# AlexNet -- not modified
+# EfficientNet_b3
 def EfficientNet_b3(num_classes, num_epochs):
     img_size = 256
     dataloaders, dataset_sizes = initialize_dataloaders(img_size)
@@ -263,7 +273,63 @@ def EfficientNet_b3(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
 
+# EfficientNet_b4
+def EfficientNet_b4(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size)
+
+    model = torchvision.models.efficientnet_b4(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(1792,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "EfficientNetB4"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
+
+# EfficientNet_b5
+def EfficientNet_b5(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size)
+
+    model = torchvision.models.efficientnet_b5(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(2048,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "EfficientNetB5"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+
+    run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
+
 num_epochs = 100
 num_classes = 7
 # AlexNet(num_classes, num_epochs)
 # EfficientNet_b3(num_classes, num_epochs)
+# EfficientNet_b4(num_classes, num_epochs)
+EfficientNet_b5(num_classes, num_epochs)
