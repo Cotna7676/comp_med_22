@@ -327,9 +327,38 @@ def EfficientNet_b5(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
 
+# VGG16
+def VGG16(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size)
+
+    model = torchvision.models.vgg16(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(4096,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "VGG16"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+
+    run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
+
 num_epochs = 100
 num_classes = 7
 # AlexNet(num_classes, num_epochs)
 # EfficientNet_b3(num_classes, num_epochs)
 # EfficientNet_b4(num_classes, num_epochs)
-EfficientNet_b5(num_classes, num_epochs)
+# EfficientNet_b5(num_classes, num_epochs)
+VGG16(num_classes, num_epochs)
