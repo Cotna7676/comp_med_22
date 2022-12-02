@@ -82,11 +82,11 @@ def run_train_model(model, model_name, criterion, best_model_wts_pth, dataloader
     save_test_loss_acc(model_name, test_loss, test_acc)
 
 # initialize datasets and dataloaders
-def initialize_dataloaders(img_size):
+def initialize_dataloaders(img_size, crop_size):
     # https://pytorch.org/hub/pytorch_vision_alexnet/
     preprocess = transforms.Compose([
         transforms.Resize(img_size),
-        transforms.CenterCrop(224),
+        transforms.CenterCrop(crop_size),
         transforms.RandomRotation(90),
         transforms.RandomVerticalFlip(),
         transforms.ToTensor(),
@@ -118,7 +118,7 @@ def initialize_dataloaders(img_size):
 # AlexNet -- not modified
 def AlexNet(num_classes, num_epochs):
     img_size = 256
-    dataloaders, dataset_sizes = initialize_dataloaders(img_size)
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
 
     model = torchvision.models.alexnet(weights='IMAGENET1K_V1')
 
@@ -148,7 +148,7 @@ def AlexNet(num_classes, num_epochs):
 # EfficientNet_b3
 def EfficientNet_b3(num_classes, num_epochs):
     img_size = 256
-    dataloaders, dataset_sizes = initialize_dataloaders(img_size)
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
 
     model = torchvision.models.efficientnet_b3(weights='IMAGENET1K_V1')
 
@@ -174,7 +174,68 @@ def EfficientNet_b3(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
+# EfficientNet_b4
+def EfficientNet_b4(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.efficientnet_b4(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(1792,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "EfficientNetB4"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
+# EfficientNet_b5
+def EfficientNet_b5(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.efficientnet_b5(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(2048,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "EfficientNetB5"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
 num_epochs = 100
 num_classes = 7
 # AlexNet(num_classes, num_epochs)
-EfficientNet_b3(num_classes, num_epochs)
+# EfficientNet_b3(num_classes, num_epochs)
+# EfficientNet_b4(num_classes, num_epochs)
+EfficientNet_b5(num_classes, num_epochs)
