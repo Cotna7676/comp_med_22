@@ -233,9 +233,40 @@ def EfficientNet_b5(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
+# MobileNetV2
+def MobileNetV2(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier = nn.Linear(1280,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "MobileNetV2"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
 num_epochs = 100
 num_classes = 7
 # AlexNet(num_classes, num_epochs)
 # EfficientNet_b3(num_classes, num_epochs)
 # EfficientNet_b4(num_classes, num_epochs)
-EfficientNet_b5(num_classes, num_epochs)
+# EfficientNet_b5(num_classes, num_epochs)
+MobileNetV2(num_classes, num_epochs)
