@@ -95,6 +95,7 @@ from sklearn.metrics import confusion_matrix
 def confusion_matrix_func(model_name, preds, true, classes):
     mat = confusion_matrix(true, preds)
 
+    plt.clf()
     plt.matshow(mat)
     plt.xticks(range(len(classes)), classes)
     plt.yticks(range(len(classes)), classes)
@@ -435,13 +436,13 @@ num_epochs = 100
 num_classes = 7
 
 # AlexNet
-# model, dataloaders = AlexNet(num_classes, num_epochs)
-# preds, labels = get_preds_and_labels(model, dataloaders)
-# confusion_matrix_func("AlexNet", preds, labels, classes)
+model, dataloaders = AlexNet(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("AlexNet", preds, labels, classes)
 
-# model, dataloaders = EfficientNet_b3(num_classes, num_epochs)
-# preds, labels = get_preds_and_labels(model, dataloaders)
-# confusion_matrix_func("EfficientNetB3", preds, labels, classes)
+model, dataloaders = EfficientNet_b3(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("EfficientNetB3", preds, labels, classes)
 
 model, dataloaders = EfficientNet_b4(num_classes, num_epochs)
 preds, labels = get_preds_and_labels(model, dataloaders)
