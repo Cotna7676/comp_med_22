@@ -263,10 +263,136 @@ def MobileNetV2(num_classes, num_epochs):
 
     run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
+# VGG16
+def VGG16(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.vgg16(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(4096,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "VGG16"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
+# VGG19
+def VGG19(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.vgg19(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier[-1] = nn.Linear(4096,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "VGG19"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
+# InceptionV3
+def InceptionV3(num_classes, num_epochs):
+    img_size = 299
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 299)
+
+    model = torchvision.models.inception_v3(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.aux_logits=False # https://stackoverflow.com/questions/51045839/pytorch-inceptionv3-transfer-learning-gives-error-max-received-an-invalid-co
+    model.fc = nn.Linear(2048,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+    print(model.parameters)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "InceptionV3"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
+# DenseNet121
+def DenseNet121(num_classes, num_epochs):
+    img_size = 256
+    dataloaders, dataset_sizes = initialize_dataloaders(img_size, 224)
+
+    model = torchvision.models.densenet121(weights='IMAGENET1K_V1')
+
+    # freeze layers
+    for param in model.parameters():
+        param.requires_grad = False
+    print(model.parameters)
+    # have output be number of classes
+    model.classifier = nn.Linear(1024,num_classes)
+    # print(model)
+    # print(model.parameters)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    model_desc = "DenseNet121"
+    model_name = "artifacts/" + model_desc + "__epochs_" + str(num_epochs)
+
+    print(model_desc)
+    best_model_wts_pth = model_name + ".pth"
+    model.load_state_dict(torch.load(best_model_wts_pth))
+
+    run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
+
 num_epochs = 100
 num_classes = 7
 # AlexNet(num_classes, num_epochs)
 # EfficientNet_b3(num_classes, num_epochs)
 # EfficientNet_b4(num_classes, num_epochs)
 # EfficientNet_b5(num_classes, num_epochs)
-MobileNetV2(num_classes, num_epochs)
+# MobileNetV2(num_classes, num_epochs)
+# VGG16(num_classes, num_epochs)
+# VGG19(num_classes, num_epochs)
+# InceptionV3(num_classes, num_epochs)
+DenseNet121(num_classes, num_epochs)
