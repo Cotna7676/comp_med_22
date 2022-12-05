@@ -1,4 +1,4 @@
-# analysis
+# plot accuracy and loss curves
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -141,17 +141,19 @@ def combo_plots_4_plots(list_of_models):
 def main():
     artifacts_path = "artifacts/"
     AlexNet = ("AlexNet", artifacts_path + "AlexNet__epochs_100.log.txt")
+    DenseNet121 = ("DenseNet121", artifacts_path + "DenseNet121__epochs_100.log.txt")
     EfficientNetB3 = ("EfficientNetB3", artifacts_path + "EfficientNetB3__epochs_100.log.txt")
     EfficientNetB4 = ("EfficientNetB4", artifacts_path + "EfficientNetB4__epochs_100.log.txt")
     EfficientNetB5 = ("EfficientNetB5", artifacts_path + "EfficientNetB5__epochs_100.log.txt")
+    InceptionV3 = ("InceptionV3", artifacts_path + "InceptionV3__epochs_100.log.txt")
     MobileNetV2 = ("MobileNetV2", artifacts_path + "MobileNetV2__epochs_100.log.txt")
     VGG16 = ("VGG16", artifacts_path + "VGG16__epochs_100.log.txt")
     VGG19 = ("VGG19", artifacts_path + "VGG19__epochs_100.log.txt")
 
-    model_list = [AlexNet, EfficientNetB3, EfficientNetB4, EfficientNetB5, MobileNetV2, VGG16, VGG19]
+    model_list = [AlexNet, DenseNet121, EfficientNetB3, EfficientNetB4, EfficientNetB5, InceptionV3, MobileNetV2, VGG16, VGG19]
 
-    # individual_plots(model_list)
-    # combo_plots(model_list)
+    individual_plots(model_list)
+    combo_plots(model_list)
     combo_plots_4_plots(model_list)
 
 main()

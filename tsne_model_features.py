@@ -101,23 +101,23 @@ def initialize_dataloaders(img_size, crop_size):
     batch_size = 64
     shuffle = True
 
-    dataloaders = {'train' : 0, 'val' : 0, 'test' : test_dataloader}
     num_train = len(open("train_labels.csv", 'r').readlines())
     num_val = len(open("val_labels.csv", 'r').readlines())
     num_test = len(open("test_labels.csv", 'r').readlines())
 
-    print("num train ", num_train, " num val ", num_val)
+    print("num train ", num_train, " num val ", num_val, " num test ", num_test)
 
     dataset_sizes = {'train' : 0, 'val' : 0, 'test' : num_test}
 
     # train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = shuffle)
     # val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False)
     test_dataloader = DataLoader(test_dataset, batch_size = num_test, shuffle = False)
+    dataloaders = {'train' : 0, 'val' : 0, 'test' : test_dataloader}
 
     return dataloaders, dataset_sizes
 
 def get_features(model, dataloaders):
-    phase = 'train'
+    phase = 'test'
     # Iterate over data.
     for inputs, labels in dataloaders[phase]:
         inputs = inputs.to(device)
@@ -125,7 +125,42 @@ def get_features(model, dataloaders):
 
         outputs = model(inputs)
         print(outputs)
+        print(outputs.shape)
 
+        print(labels, labels.shape)
+
+    return outputs, labels
+
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+def get_tsne(model_name, outputs, labels, classes):
+    n_components = 2
+    tsne = TSNE(n_components, learning_rate = 'auto')
+    tsne_result = tsne.fit_transform(outputs)
+    # pca = PCA(n_components=2)
+    # tsne_result = pca.fit_transform(outputs)
+    # print(tsne_result.shape)
+
+    # print(labels)
+    plt.clf()
+    for i in range(len(classes)):
+        class_labels = torch.nonzero(torch.where(labels == i, 1, 0))
+        # print(class_labels.shape)
+        # print(labels[class_labels].shape)
+        # print(i)
+        # print(tsne_result[class_labels].shape)
+        squeezed = np.squeeze(tsne_result[class_labels])
+        # print(squeezed.shape)
+        # print(tsne_result[class_labels])
+        # print(squeezed[:, 0], squeezed[:, 1])
+        plt.scatter(squeezed[:, 0], squeezed[:, 1], label = str(classes[i]))
+    plt.xlabel("TSNE1")
+    plt.ylabel("TSNE2")
+    plt.title(f"TSNE Plot for {model_name} Features")
+    plt.legend()
+    plt.show()
 
 # AlexNet -- not modified
 def AlexNet(num_classes, num_epochs):
@@ -154,10 +189,27 @@ def AlexNet(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
 
     model.load_state_dict(torch.load(best_model_wts_pth))
+    # print(model)
+
+    # remove num classes layer
+    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
+
+    model.eval()
+
+    return model, dataloaders
 
     # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
+metadata_path = "data/archive(2)/HAM10000_metadata.csv"
+df = pd.read_csv(metadata_path, sep = ",")
+print(df)
+classes = sorted(df.dx.unique())
+print(classes)
+
 num_epochs = 100
 num_classes = 7
-AlexNet(num_classes, num_epochs)
+model, dataloaders = AlexNet(num_classes, num_epochs)
+
+outputs, labels = get_features(model, dataloaders)
+get_tsne("AlexNet", outputs, labels, classes)
