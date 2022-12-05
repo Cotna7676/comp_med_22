@@ -1,4 +1,4 @@
-# get tsne plots of features of each model
+# confusion matrices
 
 import os
 import pandas as pd
@@ -12,6 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from PIL import Image
 from torchmetrics import F1Score
+import matplotlib.pyplot as plt
 
 # https://pytorch.org/tutorials/beginner/basics/data_tutorial.html
 
@@ -39,49 +40,6 @@ import copy, time
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
-
-def save_test_loss_acc(model_name, test_loss, test_acc):
-    f = open(f"{model_name}.log.txt", "a")
-    f.write(f"Best Model Test Loss/Acc:{test_loss},{test_acc}")
-    f.close()
-
-# train model
-def run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes):
-    model.eval()
-    phase = 'test'
-    running_loss = 0
-    running_corrects = 0
-    f_score_corrects = 0
-
-    num_batches = 0
-    # Iterate over data.
-    for inputs, labels in dataloaders[phase]:
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-        num_batches += 1
-
-        # forward
-        # track history if only in train
-        with torch.set_grad_enabled(phase == 'train'):
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-            loss = criterion(outputs, labels)
-
-        # statistics
-        running_loss += loss.item() * inputs.size(0)
-        running_corrects += torch.sum(preds == labels.data)
-
-        f1 = F1Score(num_classes = 7)
-        f_score_corrects += f1(preds, labels.data)
-
-    test_loss = running_loss / dataset_sizes[phase]
-    # test_acc = running_corrects.double() / dataset_sizes[phase]
-
-    # f score
-    test_acc = f_score_corrects.double() / num_batches
-
-    print(test_loss, test_acc)
-    save_test_loss_acc(model_name, test_loss, test_acc)
 
 # initialize datasets and dataloaders
 def initialize_dataloaders(img_size, crop_size):
@@ -117,7 +75,7 @@ def initialize_dataloaders(img_size, crop_size):
 
     return dataloaders, dataset_sizes
 
-def get_features(model, dataloaders):
+def get_preds_and_labels(model, dataloaders):
     phase = 'test'
     # Iterate over data.
     for inputs, labels in dataloaders[phase]:
@@ -125,43 +83,25 @@ def get_features(model, dataloaders):
         labels = labels.to(device)
 
         outputs = model(inputs)
-        print(outputs)
-        print(outputs.shape)
+        _, preds = torch.max(outputs, 1)
+        print(preds)
+        print(preds.shape)
 
         print(labels, labels.shape)
 
-    return outputs, labels
+    return preds, labels
 
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix
+def confusion_matrix_func(model_name, preds, true, classes):
+    mat = confusion_matrix(true, preds)
 
-def get_tsne(model_name, outputs, labels, classes):
-    n_components = 2
-    tsne = TSNE(n_components, learning_rate = 'auto')
-    tsne_result = tsne.fit_transform(outputs)
-    # pca = PCA(n_components=2)
-    # tsne_result = pca.fit_transform(outputs)
-    # print(tsne_result.shape)
-
-    # print(labels)
-    plt.clf()
-    for i in range(len(classes)):
-        class_labels = torch.nonzero(torch.where(labels == i, 1, 0))
-        # print(class_labels.shape)
-        # print(labels[class_labels].shape)
-        # print(i)
-        # print(tsne_result[class_labels].shape)
-        squeezed = np.squeeze(tsne_result[class_labels])
-        # print(squeezed.shape)
-        # print(tsne_result[class_labels])
-        # print(squeezed[:, 0], squeezed[:, 1])
-        plt.scatter(squeezed[:, 0], squeezed[:, 1], label = str(classes[i]))
-    plt.xlabel("TSNE1")
-    plt.ylabel("TSNE2")
-    plt.title(f"TSNE Plot for {model_name} Features")
-    plt.legend()
+    plt.matshow(mat)
+    plt.xticks(range(len(classes)), classes)
+    plt.yticks(range(len(classes)), classes)
+    # plt.colorbar()
+    plt.title(f"Confusion Matrix for {model_name}")
     plt.show()
+    # plt.savefig(f"confusion_matrix/{model_name}_small.png")
 
 # AlexNet -- not modified
 def AlexNet(num_classes, num_epochs):
@@ -193,14 +133,12 @@ def AlexNet(num_classes, num_epochs):
     # print(model)
 
     # remove num classes layer
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 # EfficientNet_b3
 def EfficientNet_b3(num_classes, num_epochs):
@@ -231,13 +169,12 @@ def EfficientNet_b3(num_classes, num_epochs):
     model.load_state_dict(torch.load(best_model_wts_pth))
     # print(model)
     # remove num classes layer
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-    # run_train_model(model, model_name, criterion, optimizer, num_epochs, dataloaders, dataset_sizes)
 
 # EfficientNet_b4
 def EfficientNet_b4(num_classes, num_epochs):
@@ -268,7 +205,7 @@ def EfficientNet_b4(num_classes, num_epochs):
     model.load_state_dict(torch.load(best_model_wts_pth))
     # print(model)
     # remove num classes layer
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
 
     model.eval()
@@ -304,7 +241,7 @@ def EfficientNet_b5(num_classes, num_epochs):
     model.load_state_dict(torch.load(best_model_wts_pth))
     # print(model)
     # remove num classes layer
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
 
     model.eval()
@@ -339,14 +276,12 @@ def MobileNetV2(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
     model.load_state_dict(torch.load(best_model_wts_pth))
 
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-2])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 # VGG16
 def VGG16(num_classes, num_epochs):
@@ -376,14 +311,12 @@ def VGG16(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
     model.load_state_dict(torch.load(best_model_wts_pth))
 
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 # VGG19
 def VGG19(num_classes, num_epochs):
@@ -413,13 +346,12 @@ def VGG19(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
     model.load_state_dict(torch.load(best_model_wts_pth))
 
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 # InceptionV3
 def InceptionV3(num_classes, num_epochs):
@@ -451,13 +383,12 @@ def InceptionV3(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
     model.load_state_dict(torch.load(best_model_wts_pth))
 
-    model.fc = nn.Sequential(*list(model.fc.children())[:-3])
+    # model.fc = nn.Sequential(*list(model.fc.children())[:-3])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 # DenseNet121
 def DenseNet121(num_classes, num_epochs):
@@ -487,14 +418,12 @@ def DenseNet121(num_classes, num_epochs):
     best_model_wts_pth = model_name + ".pth"
     model.load_state_dict(torch.load(best_model_wts_pth))
 
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
+    # model.classifier = nn.Sequential(*list(model.classifier.children())[:-3])
     print(model)
 
     model.eval()
 
     return model, dataloaders
-
-    # run_train_model(model, model_name, criterion, best_model_wts_pth, dataloaders, dataset_sizes)
 
 metadata_path = "data/archive(2)/HAM10000_metadata.csv"
 df = pd.read_csv(metadata_path, sep = ",")
@@ -507,37 +436,37 @@ num_classes = 7
 
 # AlexNet
 # model, dataloaders = AlexNet(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("AlexNet", outputs, labels, classes)
+# preds, labels = get_preds_and_labels(model, dataloaders)
+# confusion_matrix_func("AlexNet", preds, labels, classes)
 
 # model, dataloaders = EfficientNet_b3(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("EfficientNet_b3", outputs, labels, classes)
+# preds, labels = get_preds_and_labels(model, dataloaders)
+# confusion_matrix_func("EfficientNetB3", preds, labels, classes)
 
-# model, dataloaders = EfficientNet_b4(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("EfficientNet_b4", outputs, labels, classes)
+model, dataloaders = EfficientNet_b4(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("EfficientNetB4", preds, labels, classes)
 
-# model, dataloaders = EfficientNet_b5(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("EfficientNet_b5", outputs, labels, classes)
+model, dataloaders = EfficientNet_b5(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("EfficientNetB5", preds, labels, classes)
 
-# model, dataloaders = MobileNetV2(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("MobileNetV2", outputs, labels, classes)
+model, dataloaders = MobileNetV2(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("MobileNetV2", preds, labels, classes)
 
-# model, dataloaders = VGG16(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("VGG16", outputs, labels, classes)
+model, dataloaders = VGG16(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("VGG16", preds, labels, classes)
 
-# model, dataloaders = VGG19(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("VGG19", outputs, labels, classes)
+model, dataloaders = VGG19(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("VGG19", preds, labels, classes)
 
-# model, dataloaders = InceptionV3(num_classes, num_epochs)
-# outputs, labels = get_features(model, dataloaders)
-# get_tsne("InceptionV3", outputs, labels, classes)
+model, dataloaders = InceptionV3(num_classes, num_epochs)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("InceptionV3", preds, labels, classes)
 
 model, dataloaders = DenseNet121(num_classes, num_epochs)
-outputs, labels = get_features(model, dataloaders)
-get_tsne("DenseNet121", outputs, labels, classes)
+preds, labels = get_preds_and_labels(model, dataloaders)
+confusion_matrix_func("DenseNet121", preds, labels, classes)
