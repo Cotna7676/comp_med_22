@@ -1,0 +1,102 @@
+
+Model Name: AlexNet
+Model Name: AlexNet
+Weighted Precision: 0.7434879049356856
+Weighted Recall: 0.7623318385650224
+Micro Precision: 0.7623318385650224
+Micro Recall: 0.7623318385650224
+Macro Precision: 0.5732224207098976
+Macro Recall: 0.4927404141026973
+Model Name: EfficientNetB3
+Weighted Precision: 0.7317717189009091
+Weighted Recall: 0.7548579970104634
+Micro Precision: 0.7548579970104634
+Micro Recall: 0.7548579970104634
+Macro Precision: 0.6788890131718734
+Macro Recall: 0.44261399748830627
+Model Name: EfficientNetB4
+Weighted Precision: 0.6766827064436282
+Weighted Recall: 0.7294469357249627
+Micro Precision: 0.7294469357249627
+Micro Recall: 0.7294469357249627
+Macro Precision: 0.43483414586353736
+Macro Recall: 0.26820921278509685
+Model Name: EfficientNetB5
+Weighted Precision: 0.7098031380568146
+Weighted Recall: 0.750373692077728
+Micro Precision: 0.750373692077728
+Micro Recall: 0.750373692077728
+Macro Precision: 0.5222978704369471
+Macro Recall: 0.42196518612429573
+
+Model Name: AlexNet
+Weighted Precision: 0.7456722486578853
+Weighted Recall: 0.7653213751868461
+Micro Precision: 0.7653213751868461
+Micro Recall: 0.7653213751868461
+Macro Precision: 0.582038252382044
+Macro Recall: 0.5086837336899136
+
+Model Name: EfficientNetB3
+Weighted Precision: 0.7357538190555921
+Weighted Recall: 0.7613353263577479
+Micro Precision: 0.7613353263577479
+Micro Recall: 0.7613353263577479
+Macro Precision: 0.6094431454496835
+Macro Recall: 0.4472641778233858
+
+Model Name: EfficientNetB4
+Weighted Precision: 0.6764028706010957
+Weighted Recall: 0.7334329845540608
+Micro Precision: 0.7334329845540608
+Micro Recall: 0.7334329845540608
+Macro Precision: 0.41829029977225424
+Macro Recall: 0.2755371839839016
+
+Model Name: EfficientNetB5
+Weighted Precision: 0.7218535170374422
+Weighted Recall: 0.7508719481813653
+Micro Precision: 0.7508719481813653
+Micro Recall: 0.7508719481813653
+Macro Precision: 0.6651078248277434
+Macro Recall: 0.4108798333633841
+
+Model Name: MobileNetV2
+Weighted Precision: 0.7795935119133128
+Weighted Recall: 0.7937219730941704
+Micro Precision: 0.7937219730941704
+Micro Recall: 0.7937219730941704
+Macro Precision: 0.6438075539767271
+Macro Recall: 0.5601740284910169
+
+Model Name: VGG16
+Weighted Precision: 0.6979199173259252
+Weighted Recall: 0.7354260089686099
+Micro Precision: 0.7354260089686099
+Micro Recall: 0.7354260089686099
+Macro Precision: 0.5209780369423663
+Macro Recall: 0.37712169649100924
+
+Model Name: VGG19
+Weighted Precision: 0.6717511677146338
+Weighted Recall: 0.7100149476831091
+Micro Precision: 0.7100149476831091
+Micro Recall: 0.7100149476831091
+Macro Precision: 0.4635275376994582
+Macro Recall: 0.33666299752355444
+
+Model Name: InceptionV3
+Weighted Precision: 0.7046757606128123
+Weighted Recall: 0.7389138016940707
+Micro Precision: 0.7389138016940707
+Micro Recall: 0.7389138016940707
+Macro Precision: 0.6212053170290722
+Macro Recall: 0.3631675427997242
+
+Model Name: DenseNet121
+Weighted Precision: 0.7718389765448281
+Weighted Recall: 0.7867463876432487
+Micro Precision: 0.7867463876432487
+Micro Recall: 0.7867463876432487
+Macro Precision: 0.6468484934624464
+Macro Recall: 0.5322555737118903

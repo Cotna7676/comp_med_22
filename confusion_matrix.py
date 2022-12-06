@@ -92,16 +92,49 @@ def get_preds_and_labels(model, dataloaders):
     return preds, labels
 
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 def confusion_matrix_func(model_name, preds, true, classes):
     mat = confusion_matrix(true, preds)
 
-    plt.clf()
-    plt.matshow(mat)
-    plt.xticks(range(len(classes)), classes)
-    plt.yticks(range(len(classes)), classes)
-    # plt.colorbar()
-    plt.title(f"Confusion Matrix for {model_name}")
-    plt.show()
+    # plt.clf()
+    # plt.matshow(mat)
+    # plt.xticks(range(len(classes)), classes)
+    # plt.yticks(range(len(classes)), classes)
+    # # plt.colorbar()
+    # plt.title(f"Confusion Matrix for {model_name}")
+    # plt.show()
+
+    f = open("confusion_matrix/precision_recall.txt", "a")
+    
+    print("Model Name: ", model_name)
+
+    precision = precision_score(true, preds, average = "weighted")
+    recall = recall_score(true, preds, average = "weighted")
+    print("Weighted Precision: ", precision)
+    print("Weighted Recall: ", recall)
+
+    f.write(f"\n\nModel Name: {model_name}")
+    f.write(f"\nWeighted Precision: {precision}")
+    f.write(f"\nWeighted Recall: {recall}")
+
+    precision = precision_score(true, preds, average = "micro")
+    recall = recall_score(true, preds, average = "micro")
+    print("Micro Precision: ", precision)
+    print("Micro Recall: ", recall)
+    f.write(f"\nMicro Precision: {precision}")
+    f.write(f"\nMicro Recall: {recall}")
+
+    precision = precision_score(true, preds, average = "macro")
+    recall = recall_score(true, preds, average = "macro")
+    print("Macro Precision: ", precision)
+    print("Macro Recall: ", recall)
+    f.write(f"\nMacro Precision: {precision}")
+    f.write(f"\nMacro Recall: {recall}")
+
+    f.close()
+
+
     # plt.savefig(f"confusion_matrix/{model_name}_small.png")
 
 # AlexNet -- not modified
