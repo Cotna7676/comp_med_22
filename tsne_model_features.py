@@ -163,6 +163,37 @@ def get_tsne(model_name, outputs, labels, classes):
     plt.legend()
     plt.show()
 
+import umap
+
+def get_umap(model_name, outputs, labels, classes):
+    n_components = 2
+    # tsne = TSNE(n_components, learning_rate = 'auto')
+    # tsne_result = tsne.fit_transform(outputs)
+    umap_fn = umap.UMAP(n_components = 2)
+    umap_result = umap_fn.fit_transform(outputs)
+    # pca = PCA(n_components=2)
+    # tsne_result = pca.fit_transform(outputs)
+    # print(tsne_result.shape)
+
+    # print(labels)
+    plt.clf()
+    for i in range(len(classes)):
+        class_labels = torch.nonzero(torch.where(labels == i, 1, 0))
+        # print(class_labels.shape)
+        # print(labels[class_labels].shape)
+        # print(i)
+        # print(tsne_result[class_labels].shape)
+        squeezed = np.squeeze(umap_result[class_labels])
+        # print(squeezed.shape)
+        # print(tsne_result[class_labels])
+        # print(squeezed[:, 0], squeezed[:, 1])
+        plt.scatter(squeezed[:, 0], squeezed[:, 1], label = str(classes[i]))
+    plt.xlabel("UMAP1")
+    plt.ylabel("UMAP2")
+    plt.title(f"UMAP Plot for {model_name} Features")
+    plt.legend()
+    plt.show()
+
 # AlexNet -- not modified
 def AlexNet(num_classes, num_epochs):
     img_size = 256
@@ -538,6 +569,43 @@ num_classes = 7
 # outputs, labels = get_features(model, dataloaders)
 # get_tsne("InceptionV3", outputs, labels, classes)
 
+# model, dataloaders = DenseNet121(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_tsne("DenseNet121", outputs, labels, classes)
+
+
+# model, dataloaders = AlexNet(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_umap("AlexNet", outputs, labels, classes)
+
+# model, dataloaders = EfficientNet_b3(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_umap("EfficientNet_b3", outputs, labels, classes)
+
+# model, dataloaders = EfficientNet_b4(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_umap("EfficientNet_b4", outputs, labels, classes)
+
+# model, dataloaders = EfficientNet_b5(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_umap("EfficientNet_b5", outputs, labels, classes)
+
+# model, dataloaders = MobileNetV2(num_classes, num_epochs)
+# outputs, labels = get_features(model, dataloaders)
+# get_umap("MobileNetV2", outputs, labels, classes)
+
+model, dataloaders = VGG16(num_classes, num_epochs)
+outputs, labels = get_features(model, dataloaders)
+get_umap("VGG16", outputs, labels, classes)
+
+model, dataloaders = VGG19(num_classes, num_epochs)
+outputs, labels = get_features(model, dataloaders)
+get_umap("VGG19", outputs, labels, classes)
+
+model, dataloaders = InceptionV3(num_classes, num_epochs)
+outputs, labels = get_features(model, dataloaders)
+get_umap("InceptionV3", outputs, labels, classes)
+
 model, dataloaders = DenseNet121(num_classes, num_epochs)
 outputs, labels = get_features(model, dataloaders)
-get_tsne("DenseNet121", outputs, labels, classes)
+get_umap("DenseNet121", outputs, labels, classes)
